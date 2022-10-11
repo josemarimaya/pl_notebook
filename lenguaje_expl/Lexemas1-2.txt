@@ -1,0 +1,10 @@
+Y: "Y";
+O:"O";
+IMPLICA:"=>";
+NO:"NO";
+DOSPUNTOS:":";
+...
+IGUAL:"==";
+DISTINTO:"!=";
+...
+IDENT:

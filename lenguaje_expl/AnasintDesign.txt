@@ -1,0 +1,32 @@
+exprLogica: FALSO
+          | CIERTO
+          | predicado
+          | exprLogica Y exprLogica
+          | exprLogica O exprLogica
+          | exprLogica IMPLICA exprLogica
+          | NO exprLogica
+          | PA exprLogica PC
+          | cuantificador variables DP PA exprLogica PC
+          
+predicado : predicadoInfijo | predicadoPrefijo
+
+predicadoInfijo : 
+  term 
+  (IGUAL|MAYOR|MENOR|MAYORIGUAL|MENORIGUAL|DISTINTO) 
+  term
+
+predicadoPrefijo : IDENT PA terms PC
+
+terms : term | term COMA terms
+
+term: NUMERO
+     | term (MAS|MENOS|POR|DIVISION) term
+     | IDENT
+     | IDENT PA terms PC
+     | PA term PC
+     | MENOS term
+        
+cuantificador : PARATODO | EXISTE
+
+variables : IDENT | IDENT COMA variables
+
