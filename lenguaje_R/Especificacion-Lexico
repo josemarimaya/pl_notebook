@@ -1,0 +1,30 @@
+//Lexemas auxiliares
+fragment DIGITO: [0-9];
+fragment LETRA:[a-zA-Z];
+
+VARIABLES: 'VARIABLES';
+ASIGNACIONES: 'ASIGNACIONES';
+HLIST: 'HList';
+ILIST: 'IList';
+BLIST: 'BList';
+TRUE: 'true';
+FALSE: 'false';
+INT: 'Integer';
+BOOL: 'Boolean';
+TIMES: 'times';
+MINUS: 'minus';
+ADD: 'add';
+AND: 'and';
+OR: 'or';
+NOT: 'not';
+APPEND: 'append';
+
+NUM : ('-')?DIGITO+;
+IDENT : LETRA(LETRA|DIGITO)*;
+PARENTESISABIERTO : '(';
+PARENTESISCERRADO : ')';
+CORCHETEABIERTO : '[';
+CORCHETECERRADO : ']';
+PyC : ';';
+COMA : ',';
+ASIG: '=';

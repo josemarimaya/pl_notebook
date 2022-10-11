@@ -1,0 +1,53 @@
+programa : variables asignaciones
+
+variables : VARIABLES (decl_vars)*
+
+decl_vars : tipo vars PyC
+
+tipo: HLIST| ILIST| BLIST | INT | BOOL
+
+vars : IDENT (COMA vars)?
+
+asignaciones : ASIGNACIONES (asignacion)*
+
+asignacion: IDENT ASIG expr PyC
+
+expr: expr_lista
+    | expr_booleana
+    | expr_entera
+
+expr_lista: lista_por_extension
+    | lista_append
+    | variable
+
+lista_por_extension:
+   CORCHETEABIERTO (seq_elems)? CORCHETECERRADO
+
+lista_append: APPEND PARENTESISABIERTO
+                        expr_lista COMA expr_lista
+                     PARENTESISCERRADO
+
+variable: IDENT
+
+funcion_booleana_binaria: AND | OR
+
+expr_booleana: FALSE
+    | TRUE
+    | funcion_booleana_binaria
+          PARENTESISABIERTO
+             expr_booleana COMA expr_booleana
+          PARENTESISCERRADO
+    | NOT PARENTESISABIERTO expr_booleana PARENTESISCERRADO
+    | variable
+
+
+funcion_entera: ADD | MINUS | TIMES
+
+expr_entera: NUM
+ | funcion_entera PARENTESISABIERTO
+                     expr_entera COMA expr_entera
+                  PARENTESISCERRADO
+
+ | variable
+
+seq_elems: (expr_entera | expr_booleana | variable) (COMA seq_elems)?
