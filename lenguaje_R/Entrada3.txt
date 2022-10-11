@@ -1,0 +1,17 @@
+VARIABLES
+   HList l1,l2; //Listas hibridas
+   IList l3;    //Listas enteras
+   BList l4;    //Listas booleanas
+   Integer i,j;
+   Boolean b;
+
+ASIGNACIONES
+   i=false;
+   b=true;
+   l3=[add(i,2),and(or(false,b),true),true,-1,3];
+   j=minus(times(2,3),i);
+   l4=[j,b];
+   l4=[b];
+   l3=append(l4,l2);
+   i=add(add(i,0),add(j,3));
+   l3=[1,add(1,b)];

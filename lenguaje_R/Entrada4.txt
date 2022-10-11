@@ -1,0 +1,5 @@
+VARIABLES
+   Integer i,j;
+
+ASIGNACIONES
+   (i,j) = (2,4);
