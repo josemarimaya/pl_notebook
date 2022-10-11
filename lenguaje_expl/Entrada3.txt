@@ -1,0 +1,1 @@
+(resultado == i Y i<=numeroElementos(v))

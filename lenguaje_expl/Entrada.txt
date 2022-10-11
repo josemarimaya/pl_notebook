@@ -1,0 +1,1 @@
+PARATODO x,y:(p(f(x)+2-3*5) O r(x,y) => EXISTE z:(z+2 == 15))
