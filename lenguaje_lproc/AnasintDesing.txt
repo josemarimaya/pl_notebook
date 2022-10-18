@@ -1,0 +1,32 @@
+// procedimiento: perfil variables locales resultado
+
+procedimiento: perfil variables locales resultado EOF;
+
+perfil: nombre(variables) devuelve(resultado)
+
+
+resultado: (tipo)*
+
+variables: (variable local || variable local no elemental)*
+
+variable local: tipo resultado
+                 tipo variable
+
+variable local no elemental: vector(tipo),[rango]
+
+tipo: logico
+    |entero
+
+
+instrucciones: asignacion simple, asignaciones multiples, iteraciones, condicionales y devolucion de resultados
+
+asignaciones multiples: (variable local, variable local) = (asignacion, asignacion)
+
+asignacion simple: variable local nombre = valor
+                | variable local no elemental nombre = (valor)[rango]
+
+iteraciones: mientras .... hacer ... finmientras
+
+condicionales: variable local asignacion booleana boolean (signo booleano variable local asignacion booleana boolean)*
+
+devolucion de resultados: devuelve(variable local)
