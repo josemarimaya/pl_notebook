@@ -1,0 +1,43 @@
+(global) relacion_de_inclusion_entre_bloques = {} // Usamos una pila para hacer la relación de los bloques
+
+programa: {inicializar relacion_inclusion_entre_bloques como pila vacía} bloque {1,a} ;
+
+bloque dev ins, b: BLOQUE memoria = variables
+{apilar memoria en relacion_de_inclusion_entre_bloques}
+instrucciones = ins FBLOQUE ;
+{desapilar de relacion_de_inclusion_entre_bloques}
+
+// Cuando creamos un bloque devolvemos la instancia del bloque en el nivel que está como clave y luego sumamos 1
+// Además al map con el nivel le agregamos las instrucciones que se encuentran en el bloque del tipo {0: x,y}
+
+variables de memoria: vars
+    {añadir a memoria las variables de la cima de relacion_de_inclusion_entre_bloques si hay cima}
+    aux = vars
+    {añadir cada variable en aux a memoria}
+    PyC ;
+
+
+vars dev memoria: VAR COMA aux=vars {añadir VAR y cada elemento en aux a memoria}
+ | VAR  {añadir VAR a memoria}
+ ;
+
+instrucciones: (asignacion | bloque)* ;
+
+ // Calculo de variables no declaradas en la expresión
+expr dev variables_no_declaradas:
+ variables_no_declaradas_1 = expr   expr1 (MAS|MENOS) expr
+ | expr1
+ ;
+
+asignacion: VAR ASIG expr PyC ;
+ {añadir VAR a variables_no_declaradas si VAR no ocurre en la cima de relacion_de_inclusion_entre_bloques y
+ emitir mensaje de error si procede con la información contenida en variables_no_declaradas}
+
+
+expr1: expr2 (POR|DIV) expr1
+ | expr2
+ ;
+expr2: NUMERO #NumExpr
+ | VAR #VarExpr
+ | PA expr PC #ParExpr
+ ;
