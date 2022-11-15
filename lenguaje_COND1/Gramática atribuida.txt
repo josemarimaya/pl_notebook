@@ -66,3 +66,19 @@ sino centinela2=centinela
 
 impresion[centinela] dev centinela2 : MOSTRAR PARENTESISABIERTO vars PARENTESISCERRADO PUNTOYCOMA ;
 {si centinela=SI entonces mostramos por pantalla}
+
+condicion dev v : x = expr MAYOR y= expr #Mayor {v igual a cierto si x es mayor a y 
+                                                   v igual a falso en caso contrario}
+| x=expr MENOR y=expr #Menor {v cierto o falso segun se cumplan las condiciones}
+| x=expr IGUAL y=expr #Igual {...}
+| x=expr DISTINTO y=expr #Distinto {...}
+| x=expr MAYORIGUAL y=expr #MayorIgual {...}
+| x=expr MENORIGUAL y=expr #MenorIgual {...}
+;
+expr dev v: x=expr MAS y=expr #Mas {v igual al valor resultante de cada expresión}
+| x=expr MENOS y=expr #Menos
+| x=expr POR y=expr #Por
+| VAR #Var
+| NUM #Num
+| PARENTESISABIERTO expr PARENTESISCERRADO #ParExp
+;
