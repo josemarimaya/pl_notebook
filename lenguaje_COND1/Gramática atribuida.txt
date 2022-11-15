@@ -1,0 +1,68 @@
+OBJETIVO: Que se implementen correctamente las sentencias condicionales del lenguaje COND1
+
+Para ello seguimos las decisiones:
+
+DECISIÓN 1: Crear una memoria que guarde las asignaciones de las variables
+
+DECISIÓN 2: Cada bloque de memoria viene asociado con un centinela para indicar si sus instrucciones se pueden implementar o no
+
+(1) Crear memoria estado (global)
+
+programa: PROGRAMA variables instrucciones {crear centinela= SI} EOF;
+
+memoria: {(variable, asignacion)...}
+
+lista_vars: VAR COMA lista_vars {añadir var a estado con valor 0}
+            |VARS
+            ;
+
+instrucciones[centinela]: INSTRUCCIONES (lista_instrs[centinela])? ;
+
+instruccion[centinela] dev centinela2: centinela2=asignacion[centinela]
+| centinela2= condicional[centinela]
+| centinela2 = ruptura[centinela]
+| centinela2 = impresion[centinela]
+
+lista_instrs[centinela]: centinela2=instruccion[centinela](lista_instrs[centinela2]);
+
+asignacion[centinela] dev centinela2: VAR = v ASIG = a expr PUNTOYCOMA;
+{añadir a variable v la asignacion a en estado si centinela igual a SI
+    Y además centinela2 = centinela}
+
+// Una vez la asignacion guardamos el par v,a en la memoria
+
+Empezamos con un primer centinela para el bloque principal
+
+c1 = SI // De si interpretar
+
+condicional[centinela] dev centinela2 :
+SI PARENTESISABIERTO c = condicion PARENTESISCERRADO ENTONCES
+{si centinela igual a SI  entonces
+    si c es igual a CIERTO entonces
+    centinela_si = SI
+    y centinela_sino = NO
+    si c es igual a FALSO entonces
+    centinela_si = NO
+    y centinela_sino = SI
+
+ sino //centinela igual a NO
+    centinela_si=NO
+    centinela_sino=NO}
+lista_instrs[centinela_si] (alternativa[centinela_sino])? FINSI;
+{centinela2 = centinela}
+
+// Crea un centinela i+1 con el valor igual a lo que hay en cond.
+// Si el valor den centinela i no es igual al del centinela i+1 no se interpreta
+
+alternativa[centinela] : SINO lista_instrs[centinela] ;
+
+// Se crea un centinela nuevo que si NO cumple la condicion del centinela anterior SI se interpreta
+
+ruptura[centinela] dev centinela2: RUPTURA PUNTOYCOMA ;
+{si centinela igual a SI entonces centinela2 igual a NO
+sino centinela2=centinela
+}
+// Cuando hay una instruccion de ruptura el último centinela llamado que es el del bloque al que pertenece pasa a tener valor NO interpretar
+
+impresion[centinela] dev centinela2 : MOSTRAR PARENTESISABIERTO vars PARENTESISCERRADO PUNTOYCOMA ;
+{si centinela=SI entonces mostramos por pantalla}
