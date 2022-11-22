@@ -1,0 +1,9 @@
+Objetivo: Programar secuencias de ordenes que contienen valores enteros tanto: sus expresiones brutas, asignaciones o funciones.
+
+Decisión 1: Memoria para las asignaciones de identificadores
+
+Decisión 2: Memoria para las funciones
+
+Decisión 3: Comprobar que a las funciones se les pasa un solo parámetro
+
+

@@ -1,0 +1,53 @@
+Objetivo: Programar secuencias de ordenes que contienen valores enteros tanto: sus expresiones brutas, asignaciones o funciones.
+
+Decisión 1: Memoria para las asignaciones de identificadores
+
+Decisión 2: Memoria para las funciones
+
+Decisión 3: Comprobar que a las funciones se les pasa un solo ; // No tan relevante, se puede cumplir con la decisión
+
+Decisión 4: La interpretación de expresiones no altera la memoria pero las asignaciones y declaraciones sí
+
+Decisión 5: Pondremos centinelas para distinguir cuando estamos llamando a una función y cuándo no
+
+//expresion[centinela. parametro, valor]
+
+memoria_variables: global
+
+memoria_funciones: global
+
+programa : (orden PUNTOYCOMA)* EOF ;
+
+orden: r=expresion[no llamada a funcion, nada, nada] {mostrar mensaje por pantalla}// [centinela, parametro que se pasa, valor del parametro]
+ | asignacion #OrdenAsig
+ | funcion #OrdenFunc
+ ;
+
+asignacion[centinela] : IDENT ASIG r=expresion[no llamada a función, nada, nada] ; // r es el valor que devuelve la expresion
+{ actualizar memoria variables con el valor r para ident}
+{mostrar el mensaje correspondiente}
+
+funcion : a:IDENT PARENTESISABIERTO b:IDENT PARENTESISCERRADO ASIG
+r=expresion[no llamada a funcion, nada, nada] ;
+{si añadimos la funcion a la memoria de funciones con la función a, el parámetro b y el cuerpo expresión r}
+{mostrar el mensaje correspondiente}
+
+
+expresion[centinela, parametro, valor] dev r: PARENTESISABIERTO r=expresion[centinela, parametro, valor] PARENTESISCERRADO #ParExpr
+ | MENOS v=expresion[centina, parametro, valor] {r = -v}
+ | v1=expresion[centina, parametro, valor] POR v2=expresion[centina, parametro, valor] {r = v1*v2}
+ | v1=expresion[centina, parametro, valor] MAS v2=expresion[centina, parametro, valor] {r= v1+v2}
+ | v1=expresion[centina, parametro, valor] MENOS v2=expresion[centina, parametro, valor] {r = v1-v2}
+ | NUMERO #NumExpr
+ | IDENT {si el centinela es = llamada a funcion entonces si parametro es IDENT entonces
+            r=valor
+            sino
+                r=consultar en memoria variables el valor de IDENT
+            fsi
+           sino
+                r=consultar en memoria variables el valor de IDENT
+           fsi}
+ | IDENT PARENTESISABIERTO v=expresion[centina, parametro, valor] PARENTESISCERRADO
+ {parametro y el cuerpo = consultar la funcion IDENT en memoria funciones}
+ {r = cuerpo[llamada a funcion, parametro, valor]}
+ ;
