@@ -26,12 +26,13 @@ PyC : ';';
 // Añadimos los lexemas necesarios al nuevo lenguaje
 DP : ':';
 COMA : ',';
-ASIG: '=';
+IGUAL: '=';
 
 DOBLEASIG: '==';
 MENORIGUAL: '<=';
 MAYORIGUAL: '>=';
 NO: 'no';
+SI: 'si';
 MAYOR: '>';
 MENOR: '<';
 DISTINTO: '!=';
