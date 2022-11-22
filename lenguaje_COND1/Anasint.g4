@@ -7,7 +7,7 @@ options{
 
 programa: PROGRAMA variables instrucciones EOF;
 
-variables: VARIABLES (lista_vars)? PUNTOYCOMA;
+variables: VARIABLES (lista_vars)? PyC;
 
 lista_vars: VAR COMA lista_vars
             |VARS
@@ -22,12 +22,12 @@ instruccion : asignacion
 | ruptura
 | impresion
 ;
-asignacion : VAR ASIG expr PUNTOYCOMA;
-condicional : SI PARENTESISABIERTO condicion PARENTESISCERRADO ENTONCES
+asignacion : VAR ASIG expr PyC;
+condicional : SI PA condicion PC ENTONCES
 lista_instrs (alternativa)? FINSI;
 alternativa : SINO lista_instrs ;
-ruptura : RUPTURA PUNTOYCOMA ;
-impresion : MOSTRAR PARENTESISABIERTO vars PARENTESISCERRADO PUNTOYCOMA ;
+ruptura : RUPTURA PyC ;
+impresion : MOSTRAR PA vars PC PyC ;
 vars : VAR COMA vars
 | VAR
 ;
@@ -43,5 +43,5 @@ expr : expr MAS expr #Mas
 | expr POR expr #Por
 | VAR #Var
 | NUM #Num
-| PARENTESISABIERTO expr PARENTESISCERRADO #ParExp
+| PA expr PC #ParExp
 ;
