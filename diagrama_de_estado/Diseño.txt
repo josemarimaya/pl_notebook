@@ -1,0 +1,70 @@
+// Decisiones
+
+1. Memoria para almacenar el diagrama de estado
+    -Memoria global para almacenar transiciones
+    -Memoria para almacenar estados
+
+2. Generar de forma recursiva las secuencias desde el contenido de la memoria de transiciones
+
+3. -El código del estado se genera consultado la memoria de los estados
+   - El código de las transiciones se genera comprobando el valor del centinela y la condición de transición
+   - El código de la condición se genera consultando la memoria de transiciones haciendo la llamada recursiva
+   - Hay que memorizar el estado inicial del diagrama y las variables para generar el código
+
+// Gramatica atribuida
+
+// Map<String, List<Anasint.AsignacionContext>>
+memoria estados (global)
+// Map<String, Map<String, Anasint.CondicionContext>>
+memoria transiciones (global)
+// Set<String>
+memoria variables (global)
+// String
+variable para almacenar el estado inicial
+
+diagrama: DIAGRAMA IDENT variables estados inicial transiciones EOF;
+
+{generar código comienzo clase main}
+{generar código declaración variables}
+{generar código diagrama (incluido generar codigo de estado y condicion)}
+{generar código de finalizacion de clase y main}
+
+variables: VARIABLES vars {almacenar variables};
+{almacenamos los valores de las variables}
+
+vars: IDENT vars
+    |
+    ;
+
+estados: ESTADOS (estado)* ;
+
+estado: IDENT asignaciones ;
+
+asignaciones: asignacion asignaciones
+            |
+            ;
+
+asignacion: IDENT ASIG term PUNTOYCOMA ;
+
+inicial: INICIAL IDENT {almacenar estado inicial};
+
+transiciones: TRANSICIONES (transicion)* ;
+{almacenamos las transiciones}
+
+transicion: IDENT IDENT condicion PUNTOYCOMA ;
+
+condicion dev codigo: condicion Y condicion {codigo = c1 && c2}  #condY
+         | condicion O condicion  {codigo = c1 || c2}   #condO
+         | NO condicion   {codigo = !c1}      #condNo
+         | PARENTESISABIERTO condicion PARENTESISCERRADO  {codigo = c1 || c2}    #condPar
+         | c1=term MAYOR c2=term         {codigo = c1 > c2}     #condMayor
+         | c1=term MENOR c2=term         {codigo = c1 < c2}     #condMenor
+         | c1=term IGUAL c2=term         {codigo = c1 == c2}    #condIgual
+         | c1=term DISTINTO c2=term        {codigo = c1 != c2}  #condDistinto
+         | c1=term MAYORIGUAL c2=term      {codigo = c1 >= c2}  #condMayorIgual
+         | c1=term MENORIGUAL c2=term      {codigo = c1 <= c2}  #condMenorIgual
+         ;
+{recursividad planteada}
+
+term dev codigo: NUMERO {codigo = NUM} | IDENT {codigo = IDENT};
+
