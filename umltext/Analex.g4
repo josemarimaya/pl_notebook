@@ -2,6 +2,7 @@ lexer grammar Analex;
 ESPACIO: ' ' -> skip;
 TABULADOR: '\t'-> skip;
 SALTOLINEA: '\r'?'\n' -> skip;
+COMENTARIO: '//' .*? SALTOLINEA -> skip;
 
 fragment DIGITO:[0-9];
 fragment LETRA:[a-zA-Z];
