@@ -1,31 +1,23 @@
 parser grammar Anasint;
+
 options{
- tokenVocab=Analex;
+tokenVocab=Analex;
 }
-
 programa: esquema_fuente datos_fuente esquema_destino restricciones EOF;
+esquema_fuente: ESQUEMA FUENTE (signatura)*;
+signatura: IDENT PA atributos PC;
+atributos: IDENT COMA atributos | IDENT;
 
-esquema_fuente: ESQUEMA FUENTE constructor;
+datos_fuente: DATOS FUENTE (atomo)*;
+atomo: IDENT PA terminos PC;
+terminos: termino COMA terminos | termino;
+termino: IDENT | NUMERO;
 
-esquema_destino: ESQUEMA DESTINO constructor;
+esquema_destino: ESQUEMA DESTINO (signatura)*;
 
-constructor: IDENT PA contenido_constructor PC;
-
-contenido_constructor: IDENT
-                    | IDENT COMA contenido_constructor;
-
-datos_fuente: DATOS FUENTE atributo;
-
-atributo: IDENT PA contenido_atrib PC;
-
-contenido_atrib : (IDENT | NUMERO)
-                | (IDENT | NUMERO) COMA contenido_atrib;
-
-restricciones: RESTRICCIONES decl_var implicacion;
-
-decl_var: VAR vars PYC;
-
-vars: IDENT
-    | IDENT COMA vars;
-
-implicacion: contenido_constructor IMPLICA contenido_constructor;
+restricciones: RESTRICCIONES (restriccion)*;
+restriccion: decl_vars implicacion;
+decl_vars: VAR variables PyC;
+variables: IDENT COMA variables | IDENT;
+implicacion: datos IMPLICA datos;
+datos: IDENT PA variables PC;
