@@ -1,0 +1,59 @@
+OBJETIVO
+
+Diseño de gramática atribuida para un analizador semántico de INTEXP capaz de
+detectar asignaciones ambiguas
+
+VARIABLES x,y,z;
+INSTRUCCIONES
+x=1;
+y=2*(x+7);
+z=z+1;
+x=z();
+
+
+DECISIONES
+
+DECISION 1) DETECTAR EXPRESIONES AMBIGUAS, ES DECIR, EN CADA EXPRESIÓN SE LE ASOCIA UN CENTINELA PARA INDICAR SI ES AMBIGUA O NO
+
+expresion dev centinela:
+ | NUMERO {centinela = no ambigua}#Num
+ | IDENT {centinela = no ambigua, ya que según el problema es una variable preasignada con valor 0}
+    PARENTESISABIERTO PARENTESISCERRADO #VarNoAmb
+ | IDENT {consultar en memoria si la variable es ambigua o no} #Var
+ | PARENTESISABIERTO expresion PARENTESISCERRADO
+ {centinela = cent, la ambiguedad no deoende de los parentesis sino de lo que hay dentro} #Par
+ |  cent1=expresion (POR|DIV|MAS|MENOS) cent2=expresion #OpBin
+ {si cent1 o cent2 es ambigua entonces centinela es ambigua sino centinela es no ambigua}
+ ;
+DECISION 2) Detectar asignaciones ambiguas. Cada variable declarada inicialmente tiene que tener un centinela indicando
+que es ambigua
+-Esta decision implica que hay que tener una memoria para almacenar esta informacion
+Usando como estructura: variable = centinela
+- Una vez calculada la ambiguedad de la expresion (decision 1) si la expresion no es ambigua entonces actualizar
+la memoria con el centinela asociada a la expresion. En el caso que la asociacion si sea ambigua, escribir mensaje por pantalla
+
+GRAMATICA ATRIBUIDA
+
+(global) memoria para almacenar variable = centinela
+
+programa : declaracion_variables instrucciones EOF ;
+declaracion_variables: VARIABLES variables PUNTOYCOMA
+ ;
+variables: IDENT COMA variables #Ids {almacenar IDENT en memoria con ambigua}
+ | IDENT #Id {almacenar IDENT en memoria con ambigua}
+ ;
+instrucciones: INSTRUCCIONES (asignacion)* ;
+asignacion : IDENT ASIG centinela=expresion PUNTOYCOMA ;
+{Actualizar IDENT en memoria con el valor del centinela
+ Si las asignacion es ambigua lanzar mensaje de error}
+
+expresion dev centinela:
+ | NUMERO {centinela = no ambigua}#Num
+ | IDENT {centinela = no ambigua, ya que según el problema es una variable preasignada con valor 0}
+    PARENTESISABIERTO PARENTESISCERRADO #VarNoAmb
+ | IDENT {consultar en memoria si la variable es ambigua o no} #Var
+ | PARENTESISABIERTO expresion PARENTESISCERRADO
+ {centinela = cent, la ambiguedad no deoende de los parentesis sino de lo que hay dentro} #Par
+ |  cent1=expresion (POR|DIV|MAS|MENOS) cent2=expresion #OpBin
+ {si cent1 o cent2 es ambigua entonces centinela es ambigua sino centinela es no ambigua}
+ ;

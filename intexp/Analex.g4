@@ -1,0 +1,17 @@
+lexer grammar Analex;
+fragment DIGITO: [0-9];
+fragment LETRA:[a-zA-Z];
+
+VARIABLES: 'VARIABLES';
+PUNTOYCOMA: ';';
+INSTRUCCIONES: 'INSTRUCCIONES';
+NUMERO: DIGITO(DIGITO)+;
+IDENT: LETRA(DIGITO|LETRA)*;
+ASIG: '=';
+POR: '*';
+MAS: '+';
+MENOS: '-';
+DIV: '/';
+PARENTESISABIERTO: '(';
+PARENTESISCERRADO: ')';
+COMA: ',';
