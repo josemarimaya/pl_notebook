@@ -1,0 +1,83 @@
+OBJETIVO
+
+Queremos diseñar un analizador semántico capaz de decidir si es semánticamente
+correcto, es decir, si cada tupla declarada en datos fuentes pertenece a alguna
+relación de esquemas
+
+DECISION
+
+DECISION 1) HACER UNA MEMORIA QUE ALMACENE LOS ESQUEMAS QUE HAY
+
+DECISION 2) ALMACENAR IDENT Y SU NUMERO DE VARIABLES EN MEMORIA
+QUE ESTÁN EN SIGNATURA
+
+signatura: IDENT PA num=atributos PC; {Almacenar en memoria Ident como clave y guardar el numero de atributos}
+atributos dev num: IDENT COMA num2=atributos {num=1+num2} | IDENT {num=1};
+
+DECISION 3) COMPROBAR QUE EL DATO COINCIDE CON ALGÚN ESQUEMA.
+Cada vez que se defina una tupla, comprobar:
+3.1) que el ident existe en memoria
+3.2) numero de terminos coincide con el valor en memoria del ident
+
+datos_fuente: DATOS FUENTE centinela=(tupla)+ ;
+
+{Si centinela = error entonces hay mensaje de error
+ Si centinela = correcto entonces mensaje de aprobación}
+
+tupla: IDENT PA num=terminos PC ;
+{3.1 consultamos en memoria si IDENT está en memoria
+3.2 num1 = comprobar que existe y si es argumento de IDENT
+
+si num1 no existe:
+    se emite mensaje de error
+sino
+    si num1=num2
+        emito el mensaje de correcto
+    sino
+        emito mensaje de error
+}
+
+terminos dev num: termino COMA terminos
+ | termino
+ {recorremos la cantidad de terminos que hay y devolvemos el numero de terminos}
+ ;
+ termino: IDENT
+  | NUMERO
+  ;
+  
+
+GRAMATICA ATRIBUIDA
+
+//decision 1 (global) nombre_tabla: valor_tabla
+entrada : esquema_fuente datos_fuente esquema_destino restricciones EOF;
+esquema_fuente : ESQUEMA FUENTE (signatura)+ ;
+
+//decisión 2
+signatura: IDENT PA num=atributos PC; {Almacenar en memoria Ident como clave y guardar el numero de atributos}
+atributos dev num: IDENT COMA num2=atributos {num=1+num2} | IDENT {num=1};
+
+datos_fuente: DATOS FUENTE (tupla)+ ;
+
+esquema_destino: ESQUEMA DESTINO (signatura)+ ;
+restricciones: RESTRICCIONES (restriccion)+ ;
+
+restriccion: variables implicacion ;
+
+variables: VAR vars PyC ;
+
+vars: IDENT COMA vars
+ | IDENT
+ ;
+
+implicacion: tupla IMPLICA tupla ;
+
+// decision 3
+tupla: IDENT PA terminos PC ;
+
+terminos: termino COMA terminos
+ | termino
+ ;
+
+termino: IDENT
+ | NUMERO
+ ;
