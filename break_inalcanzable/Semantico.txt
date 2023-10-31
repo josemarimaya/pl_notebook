@@ -1,0 +1,59 @@
+OBJETIVO
+
+Queremos construir un semántico que sea capaz de detectar rupturas
+de control inalcanzables
+
+DECISIONES
+
+1. Entrando en un bucle while queremos que se vaya comprobando en los distintos
+niveles del mismo si existe un break con el que se provoque una ruptura
+y haga innecesario las instrucciones restantes.
+2. Usaremos una variable global
+   booleana para acceder a ella y
+   consultarla para ver si hemos conseguido un break. Usándola como centinela
+3. Una vez que nos encontremos con otro break teniendo el centinela en true
+marcaremos en qué línea está el control inalcanzable
+4. Tendremos en cuenta que de manera externa se propaga el valor del cent
+pero de interno a externo no. Es decir, si el centinela está a true
+el break de un if no será válido. Pero si se pone cent a true dentro del if
+no se mantiene cuando salga del mismo
+
+programa : {cent=false} instrucciones[cent]  EOF ;
+instrucciones[cent] : instruccion[cent] instrucciones
+ | instruccion[cent]
+ ;
+instruccion : asignacion[cent]
+ | iteracion[cent]
+ | seleccion[cent]
+ | ruptura[cent]
+ ;
+
+asignacion[cent] : IDENT ASIG expr[cent] PyC ;
+
+iteracion : WHILE PA expr[cent] PC bloque ;
+
+seleccion : IF PA expr[cent] PC bloque ;
+
+ruptura[cent] dev cent : BREAK PyC ;
+{si cent= true entonces devolvemos el mensaje con la linea como
+    ruptura inalcanzable
+  si cent=false entonces cent=true}
+bloque[cent] dev cent: instruccion
+ | LLA instrucciones LLC { cent = false ya que significa que o
+ hemos salido del bucle o hemos salido de una subinstruccion del bucle}
+ ;
+
+expr : expr_suma[cent]
+ ((MENOR|MAYOR|MENORIGUAL|MAYORIGUAL|IGUAL|DISTINTO) expr_suma)?
+ ;
+
+expr_suma : expr_mult[cent] ((MAS|MENOS) expr_mult)*
+ ;
+
+expr_mult : expr_base[cent] ((POR|DIV) expr_base)*
+ ;
+
+expr_base : NUMERO
+ | IDENT
+ | PA expr PC
+ ;
