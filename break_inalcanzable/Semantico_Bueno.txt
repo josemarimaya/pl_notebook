@@ -1,0 +1,111 @@
+SOLUCIÓN
+--------
+
+OBJETIVO:
+   Construir un analizador semántico capaz de detectar instrucciones
+   de ruptura (break) inalcanzables.
+   Una instrucción de ruptura es inalcanzable si y sólo si en el bloque blq
+   el que ésta aparece o en un bloque externo en el que blq esté contenido
+   hay una ruptura anterior.
+
+DECISIONES:
+
+(1) La solución del problema sólo depende de los bloques y 
+    breaks en el programa (abstracción horizontal).
+    
+    while (i>9){                      {
+       i=9;                               
+       if (v==x){                        {
+          i=i+3;
+          break;                            break (línea 5); 
+          break;                            break;(línea 6);
+       }                                 }
+       break;                            break;(línea 8)
+    }                                 }  
+    
+ (2) Saber si una instrucción break es inalcanzable depende del contexto 
+     en el que ocurre dicho break. 
+    
+    (a) En un mismo bloque, el break inalcanzable dependerá de la existencia
+        de un break anterior. Necesitamos un centinela (cent) para indicar la  
+        existencia de break anterior en el bloque:
+        
+        {
+            //  cent = NO hay break anterior
+            break;   
+            // cent = SI hay break anterior
+            break; //Inalcanzable
+        }
+         
+        
+     (b) La existencia de break en un bloque externo hace inalcanzable  
+         cualquier break en un bloque interno. Los breaks internos no 
+         condicionan a los breaks externos.
+        
+        // cent-ext = SI hay break anterior
+        {   
+           // cent-int = SI hay break anterior
+           break; //Inalcanzable
+           ...
+        } 
+        // cent-ext = SI hay break anterior
+        
+        // cent-ext = NO hay break anterior
+        {   
+           // cent-int = NO hay break anterior
+           break; 
+           ...
+        } 
+        // cent_ext = NO hay break anterior
+        
+        
+GRAMÁTICA ATRIBUIDA:
+--------------------
+        
+        programa : {cent=NO hay break anterior}  instrucciones[cent] ;
+
+        (1),(2.a),(2.b)                                
+        instrucciones[cent] :
+             cent_aux=instruccion[cent] instrucciones[cent_aux]
+           | r=instruccion[cent]
+             
+        (1)
+        instruccion[cent] dev r : r=asignacion[cent]
+                                | r=iteracion[cent]
+                                | r=seleccion[cent]
+                                | r=ruptura[cent]
+
+         asignacion[cent] dev r: IDENT ASIG expr PyC  {r=cent} (1)
+
+         iteracion[cent_ext] dev r: WHILE PA expr PC {cent_int = cent_ext}
+                                       bloque[cent_int]
+                                    {r=cent_ext} (2.b)
+
+         seleccion[cent_ext] dev r: IF PA expr PC {cent_int = cent_ext}
+                                       bloque[cent]
+                                    {r=cent_ext} (2.b)
+
+         ruptura[cent] dev r: BREAK
+           {r = SI hay break anterior
+            si cent es igual a SI hay break anterior entonces
+               emitir mensaje de break inalcanzable
+            fsi } (2.a)
+
+        (1)
+        bloque[cent]: r=instruccion[cent]
+                    | LLA instrucciones[cent] LLC
+
+        expr : expr_suma
+           ((MENOR|MAYOR|MENORIGUAL|MAYORIGUAL|IGUAL|DISTINTO) expr_suma)?
+             ;
+
+        expr_suma : expr_mult ((MAS|MENOS) expr_mult)*
+                  ;
+
+        expr_mult : expr_base ((POR|DIV) expr_base)*
+                  ;
+
+        expr_base : NUMERO
+                  | IDENT
+                  | PA expr PC
+                  ;
