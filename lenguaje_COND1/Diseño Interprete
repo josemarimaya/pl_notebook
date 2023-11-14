@@ -1,0 +1,156 @@
+La interpretación del programa COND1 se basa en las siguientes restricciones:
+(1) La declaración de variables inicializa éstas al valor 0.
+(2) Las instrucciones se ejecutan secuencialmente.
+(3) La asignación de un valor a una variable se realiza con el operador =.
+(4) Las expresiones aritméticas pueden utilizar operadores suma, resta y multiplicación. Las
+expresiones booleanas o condiciones pueden utilizar el operador de igualdad, mayor,
+menor, mayor o igual, menor o igual y distinto.
+(5) La ejecución de una instrucción condicional implica evaluar la condición y ejecutar el
+bloque de instrucciones correspondiente.
+(6) La instrucción de ruptura provoca la interrupción en la ejecución del bloque de
+instrucciones en el que ocurre la ruptura.
+(7) Las impresiones por pantalla tienen como argumento una secuencia de variables. La
+impresión muestra el valor de las variables correspondientes. Por ejemplo, mostrar(x,y)
+mostrará un mensaje del tipo (mostrar) x=..., y=...
+
+OBJETIVO
+
+Hacer un interprete para el lenguaje cond1
+
+DECISIONES
+
+1. Haremos una memoria Map<String, Integer> de las variables donde las keys serán las variables
+y el valor será inicialmente 0 cuando se encuentren por primera vez
+2. Usaremos un centinela para ver si omitimos las instrucciones siguientes,
+cuando cent = false omitiremos los bloques de instrucciones siguientes
+que estén contenidos en dicho condicional o bucle
+3. Se actualizará el valor de la variable x que esté en mem_var con el valor
+que esté a la derecha del símbolo =
+4. Cuando haya una operacion aritmetica a la derecha de una asignación,
+primero se hará la operación y luego se actualizará el valor de la variable
+con el resultado de dicha operacion
+5. Cuando usemos la funcion mostrar se aplicará system.out.print.ln
+a los valores que estén en memoria en ese momento de manera secuencial
+enseñando los valores. Ej mostrar(z,y)
+syso(z) + '\n'+ syso(y)
+6. Si la operacion condicional o iterativo que hay en un condicional es
+cent = true haremos las instrucciones que estarán dentro del bloque,
+sino lo omitiremos
+7. El centinela = true de nuevo una vez que salga del bloque contenido
+en dicho condicional o iteracion
+
+
+DECISIONES PROFESOR
+
+1. Necesitamos una memoria para almacenar el valor de las variables
+que inicialmente será 0
+
+2. A cada bloque del programa se le asocia un centinela para indicar si se
+interpreta o no. Al bloque más externo se le asocia un centinela con el valor
+SI HAY QUE INTERPRETAR
+
+Los centinelas de los bloques externos se propagan al bloque interno pero
+no al revés
+
+3. Nuestro interprete procesa las instrucciones secuencialmente de la
+siguiente forma:
+
+3.1 asignacion: VAR ASIG expr PYC
+
+Evaluar la expresión de forma recursiva en la que actualizaremos
+en la memoria el valor de VAR
+
+3.2. RUPTURA: ruptura pyc
+
+Detener la interpretacion del bloque en el que estoy actualizando
+el valor del centinela a NO INTERPRETAR
+
+3.3 impresion : MOSTRAR PA vars PC
+
+Consultar en memoria para imprimir el valor de cada variable
+en vars por orden secuencial
+
+3.4 condicional: SI PARENTESISABIERTO condicion PARENTESISCERRADO ENTONCES
+                  lista_instrs (alternativa)?
+                  FINSI;
+
+
+     evaluar la condición, consultando en memoria el estado de las variables,
+     dependiendo del valor de la condicion hay que interpretar un bloque u otro,
+     por lo que tengo que crear un centinela para cada bloque
+
+3.5 Devolveremos la expresion resuelta para que la usen las funciones pertinentes
+expr dev e: r1=expr MAS r2=expr #Mas
+{r1=expr MAS r2=expr  se  traduce como r=r1+r2
+ | r1=expr MENOS r2=expr #Menos
+{resolviendo esta exprescion tenemos que r=r1-r2}
+ | r1=expr POR r2=expr #Por
+ {resolvemos la operacion r = r1 * r2}
+ | VAR #Var
+ {Consultamos en memoria el valor de la variable}
+ | NUM #Num
+ {Identificamos el valor como un valor entero}
+ | PARENTESISABIERTO e=expr PARENTESISCERRADO #ParExp
+ {devolvemos r=(e)}
+ ;
+
+ 3.6
+
+ Iniciamos memoria global vacia
+
+ programa : PROGRAMA variables instrucciones EOF ;
+
+variables : VARIABLES (lista_vars)? PUNTOYCOMA;
+
+lista_vars : VAR COMA lista_vars{almacenar VAR en memoria con valor 0}
+ | VAR {almacenar VAR en memoria con valor 0}
+ ;
+instrucciones : INSTRUCCIONES (lista_instrs)? ;
+
+lista_instrs[cent] : cent_nuevo=instruccion[cent] (lista_instrs[cent_nuevo])? ;
+{Recogemos por parametro el centinela que devuelve instruccion
+ y luego se lo pasamos por parametro a lista_instrs}
+
+ asignacion[cent] dev cent_nuevo : VAR ASIG v=expr PUNTOYCOMA;
+{
+    si cent igual a SI INTERPRETAR entonces
+        almacenar VAR en memoria con valor v
+    fsi
+    cent_nuevo = cent
+}
+
+ruptura[cent] dev cent_nuevo: RUPTURA PUNTOYCOMA ;
+{cent_nuevo= NO INTERPRETAR}
+
+impresion[cent] dev cent_nuevo: MOSTRAR PARENTESISABIERTO vars PARENTESISCERRADO PUNTOYCOMA ;
+{si cent igual a SI INTERPRETAR
+    entonces devolvemos por pantalla las vars de manera secuencia
+  fsi
+  cent_nuevo=cent}
+instruccion[cent] dev cent_nuevo: cent_nuevo=asignacion[cent]
+ | cent_nuevo=condicional[cent]
+ | ruptura{cent_nuevo= NO INTERPRETAR}
+ | cent_nuevo=impresion[cent]
+ ;
+
+ condicion dev cent: e1=expr MAYOR e2=expr #Mayor
+ {interpretamos e1 > e2 si es true cent = true sino cent = false}
+  | e1=expr MENOR e2=expr #Menor
+  {interpretamos e1 < e2 si es true cent = true sino cent = false}
+  | e1=expr IGUAL e2=expr #Igual
+  {interpretamos e1 == e2 si es true cent = true sino cent = false}
+  | e1=expr DISTINTO e2=expr #Distinto
+  {interpretamos e1 != e2 si es true cent = true sino cent = false}
+  | e1=expr MAYORIGUAL e2=expr #MayorIgual
+  {interpretamos e1 >= e2 si es true cent = true sino cent = false}
+  | e1=expr MENORIGUAL e2=expr #MenorIgual
+  {interpretamos e1 =< e2 si es true cent = true sino cent = false}
+  ;
+
+  condicional[cent] : SI PARENTESISABIERTO c=condicion PARENTESISCERRADO ENTONCES
+   lista_instrs (alternativa[c])?
+   FINSI;
+
+   alternativa[c] : SINO lista_instrs ;
+   {Recibimos el centinela de condicion, si este es false, entonces hacemos
+   la lista de instr}
