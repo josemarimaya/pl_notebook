@@ -1,0 +1,127 @@
+OBJETIVO
+--------
+Construir un intÃ©rprete para el lenguaje calcprog (ver problema)
+
+DECISIONES DE DISEÃ‘O
+--------------------
+(1) Dado que el programa calcprog se interpreta secuencialmente, se necesita una
+memoria para almacenar el valor de cada variable y la definiciÃ³n de cada funciÃ³n.
+
+memoria de variables: El Ãºnico tipo de datos de calcprog es el tipo entero. Las
+variables toman valores enteros.
+
+     nombre variable  |   valor variable
+     -----------------------------------
+         a            |        2
+                     ...
+
+memoria de funciones:
+
+     nombre funcion   |   parametro funcion   |   cuerpo funcion
+     ---------------------------------------------------
+         f            |        a              |  10 * a;
+         g            |        x              |  10*f(x) + a;
+
+(2) La interpretaciÃ³n de las expresiones no altera ninguna memoria.
+Las asignaciones alteran la memoria de las variables y las declaraciones
+de funciones alteran la memoria de funciones.
+
+(3) Interpretar expresiÃ³n.
+ Â¿CÃ³mo distinguir la interpretaciÃ³n de una expresiÃ³n del programa de la expresiÃ³n correspondiente a
+  una llamada a una funciÃ³n?  En la primera no hay parÃ¡metros pero en la segunda sÃ­.
+
+La interpretaciÃ³n de una expresiÃ³n sin parÃ¡metros se define de la siguiente forma:
+
+expresion dev r: PARENTESISABIERTO r=expresion PARENTESISCERRADO
+          | MENOS v=expresion {r=-v}
+          | v1=expresion POR v2=expresion {r=v1*v2}
+          | v1=expresion MAS v2=expresion {r=v1+v2}
+          | v1=expresion MENOS v2=expresion {r=v1-v2}
+          | NUMERO {r=NUMERO}
+          | IDENT  {r=consultar valor de IDENT en memoria de variables}
+          | IDENT PARENTESISABIERTO v=expresion PARENTESISCERRADO
+            {(p, expresion_cuerpo)=consultar la funcion IDENT en la memoria de funciones
+              r = interpretar la expresion resultante de sustituir parametro p por valor v en expresion_cuerpo}
+
+La interpretaciÃ³n de una expresiÃ³n con parÃ¡metros se define de la siguiente forma:
+
+expresion[parametro, valor] dev r:
+            PARENTESISABIERTO r=expresion[parametro, valor] PARENTESISCERRADO
+          | MENOS v=expresion[parametro, valor] { r = -v }
+          | v1=expresion[parametro, valor] POR v2=expresion[parametro, valor] { r = v1 * v2 }
+          | v1=expresion[parametro, valor] MAS v2=expresion[parametro, valor] { r = v1 + v2 }
+          | v1=expresion[parametro, valor] MENOS v2=expresion[parametro, valor] { r = v1 - v2 }
+          | NUMERO {r=NUMERO}
+          | IDENT  {si parametro es IDENT entonces r = valor
+                    sino r = consultar el valor de IDENT en memoria de variables
+                    fsi}
+          | IDENT PARENTESISABIERTO v=expresion[parametro, valor] PARENTESISCERRADO
+            { (p, expresion_cuerpo)=consultar la funcion IDENT en la memoria de funciones
+              r = interpretar la expresion resultante de sustituir parametro p por valor v en cuerpo -> interpretar expresion_cuerpo[parametro=p,valor=v]}
+
+
+Ambas interpretaciones se pueden fusionar aÃ±adiendo un centinela para seleccionar un caso o el otro:
+
+expresion[centinela, parametro, valor] dev r:
+            PARENTESISABIERTO r=expresion[centinela, parametro, valor] PARENTESISCERRADO
+          | MENOS v=expresion[centinela, parametro, valor] { r = -v }
+          | v1=expresion[centinela, parametro, valor] POR v2=expresion[centinela, parametro, valor]
+              { r = v1 * v2 }
+          | v1=expresion[centinela, parametro, valor] MAS v2=expresion[centinela, parametro, valor]
+              { r = v1 + v2 }
+          | v1=expresion[centinela, parametro, valor] MENOS v2=expresion[centinela, parametro, valor]
+              { r = v1 - v2 }
+          | NUMERO {r=NUMERO}
+          | IDENT  {si centinela = true (interpretando llamada a funcion) entonces
+                       si parametro es IDENT entonces
+                          r = valor
+                       sino
+                          r = consultar el valor de IDENT en memoria de variables
+                       fsi
+                    sino
+                       r = consultar el valor de IDENT en memoria de variables
+                    fsi}
+          | IDENT PARENTESISABIERTO v=expresion[centinela, parametro, valor] PARENTESISCERRADO
+            { (p, expresion_cuerpo)=consultar la funcion IDENT en la memoria de funciones
+               r = interpretar la expresion resultante de sustituir parametro p por valor v en cuerpo -> interpretar expresion_cuerpo[centinela=true,parametro=p,valor=v]}
+
+
+GRAMATICA ATRIBUIDA
+-------------------
+programa : (orden PUNTOYCOMA)*  ;
+orden: r=expresion[no llamada a funcion, nada, nada] {mostrar mensaje correspondiente}
+     | asignacion
+     | funcion
+     ;
+asignacion :  IDENT ASIG r=expresion[no llamada a funcion,nada,nada]
+              {actualizar almacen de variables con un valor r para IDENT
+               mostrar mensaje correspondiente};
+
+funcion : a:IDENT PARENTESISABIERTO b:IDENT PARENTESISCERRADO ASIG r=expresion[no llamada a funcion,nada,nada]
+          {actualizar almacen de funciones con una funcion a:IDENT
+           con parametro b:IDENT y cuerpo expresion
+           mostrar mensaje correspondiente };
+
+expresion[centinela, parametro, valor] dev r:
+            PARENTESISABIERTO r=expresion[centinela, parametro, valor] PARENTESISCERRADO
+          | MENOS v=expresion[centinela, parametro, valor] { r = -v }
+          | v1=expresion[centinela, parametro, valor] POR v2=expresion[centinela, parametro, valor]
+              { r = v1 * v2 }
+          | v1=expresion[centinela, parametro, valor] MAS v2=expresion[centinela, parametro, valor]
+              { r = v1 + v2 }
+          | v1=expresion[centinela, parametro, valor] MENOS v2=expresion[centinela, parametro, valor]
+              { r = v1 - v2 }
+          | NUMERO {r=NUMERO}
+          | IDENT  {si centinela = true (llamada a funcion) entonces
+                       si parametro es IDENT entonces
+                          r = valor
+                       sino
+                          r = consultar el valor de IDENT en memoria de variables
+                       fsi
+                    sino
+                          r = consultar el valor de IDENT en memoria de variables
+                    fsi}
+          | IDENT PARENTESISABIERTO v=expresion[centinela, parametro, valor] PARENTESISCERRADO
+            { (p, expresion_cuerpo)=consultar la funcion IDENT en la memoria de funciones
+               r = interpretar la expresion resultante de sustituir parametro p por valor v en cuerpo -> interpretar expresion_cuerpo[centinela=true,parametro=p,valor=v]}
+
