@@ -4,22 +4,27 @@ import java.util.Map;
 public class interprete_calcproc extends AnasintBaseVisitor<Integer>{
 
     // DECISIÓN 1
-
     Map<String, Integer> mem_var = new HashMap<>();
-    Map<String, Map<String, String>> mem_func = new HashMap<>();
-
+    Map<String, Map<String, Integer>> mem_func = new HashMap<>();
     Boolean cent = null;
 
     @Override
     public Integer visitAsignacion(Anasint.AsignacionContext ctx) {
-        String var = ctx.ASIG().getText();
-        Integer valor = visitExpr(ctx.expresion(), cent, var, mem_var.get(var));
-        return super.visitAsignacion(ctx);
+        String var = ctx.IDENT().getText();
+        Integer valor = visitExpr(ctx.expresion(), cent, var);
+        mem_var.put(var, valor);
+        return null;
     }
 
     @Override
     public Integer visitFuncion(Anasint.FuncionContext ctx) {
-        return super.visitFuncion(ctx);
+        String var = ctx.IDENT(0).getText();
+        String param = ctx.IDENT(1).getText();
+        Integer exp = visitExpr(ctx.expresion(), cent, param, valor);
+        Map<String, Integer> aux = new HashMap<>();
+        aux.put(param, exp);
+        mem_func.put(var, aux);
+        return null;
     }
 
     public Integer visitExpr(Anasint.ExpresionContext ctx, Boolean cent,
@@ -30,8 +35,16 @@ public class interprete_calcproc extends AnasintBaseVisitor<Integer>{
         if (ctx instanceof Anasint.LlamadaExprContext){
             visitLlamadaExpr((Anasint.LlamadaExprContext) ctx, cent, parametro, valor);
             // Igual para las demás etiquetas que hay en expr
-        } else if () {
-
+        } else if (ctx instanceof Anasint.ParExprContext) {
+            visitParExpr((Anasint.ParExprContext) ctx, cent, parametro, valor);
+        } else if (ctx instanceof Anasint.NumExprContext) {
+            visitParExpr((Anasint.NumExprContext) ctx, cent, parametro, valor);
+        }else if (ctx instanceof Anasint.IdentExprContext) {
+            visitParExpr((Anasint.IdentExprContext) ctx, cent, parametro, valor);
+        }else if (ctx instanceof Anasint.ParExprContext) {
+            visitParExpr((Anasint.ParExprContext) ctx, cent, parametro, valor);
+        }else if (ctx instanceof Anasint.ParExprContext) {
+            visitParExpr((Anasint.ParExprContext) ctx, cent, parametro, valor);
         }
 
         return  res;
@@ -40,19 +53,19 @@ public class interprete_calcproc extends AnasintBaseVisitor<Integer>{
 
 
     public Integer visitParExpr(Anasint.ParExprContext ctx, Boolean cent,
-                                String parametro, Integer valor) {
+                                String parametro) {
         return super.visitParExpr(ctx);
     }
 
     @Override
     public Integer visitUnarioMenosExpr(Anasint.UnarioMenosExprContext ctx, Boolean cent,
-                                        String parametro, Integer valor) {
-        return super.visitUnarioMenosExpr(ctx);
+                                        String parametro) {
+        return - Integer.parseInt(ctx.expresion().getText());
     }
 
 
     public Integer visitOrdenExpr(Anasint.OrdenExprContext ctx, Boolean cent,
-                                  String parametro, Integer valor) {
+                                  String parametro) {
         return super.visitOrdenExpr(ctx);
     }
 
@@ -63,29 +76,45 @@ public class interprete_calcproc extends AnasintBaseVisitor<Integer>{
     }
 
     public Integer visitNumExpr(Anasint.NumExprContext ctx, Boolean cent,
-                                String parametro, Integer valor) {
-        return super.visitNumExpr(ctx);
+                                String parametro) {
+        String num = ctx.NUMERO().getText();
+        Integer res = Integer.parseInt(num);
+        return res;
+    }
+
+
+    public Integer visitMasExpr(Anasint.MasExprContext ctx, Boolean cent,
+                                String parametro) {
+        String v1 = ctx.expresion(0).getText();
+        String v2 = ctx.expresion(1).getText();
+        Integer v1_n = Integer.parseInt(v1);
+        Integer v2_n = Integer.parseInt(v2);
+        return v1_n+v2_n;
     }
 
 
     public Integer visitMenosExpr(Anasint.MenosExprContext ctx, Boolean cent,
-                                  String parametro, Integer valor) {
-        return super.visitMenosExpr(ctx);
+                                  String parametro) {
+        String v1 = ctx.expresion(0).getText();
+        String v2 = ctx.expresion(1).getText();
+        Integer v1_n = Integer.parseInt(v1);
+        Integer v2_n = Integer.parseInt(v2);
+        return v1_n-v2_n;
     }
 
 
     public Integer visitPorExpr(Anasint.PorExprContext ctx, Boolean cent,
                                 String parametro, Integer valor) {
-        return super.visitPorExpr(ctx);
+        String v1 = ctx.expresion(0).getText();
+        String v2 = ctx.expresion(1).getText();
+        Integer v1_n = Integer.parseInt(v1);
+        Integer v2_n = Integer.parseInt(v2);
+        return v1_n*v2_n;
     }
 
     public Integer visitLlamadaExpr(Anasint.LlamadaExprContext ctx, Boolean cent,
                                     String parametro, Integer valor) {
-        return super.visitLlamadaExpr(ctx);
+        return visitExpr(ctx.expresion(), cent, parametro, valor);
     }
 
-    public Integer visitMasExpr(Anasint.MasExprContext ctx, Boolean cent,
-                                String parametro, Integer valor) {
-        return super.visitMasExpr(ctx);
-    }
 }
