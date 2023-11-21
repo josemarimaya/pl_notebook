@@ -1,0 +1,127 @@
+DECISIONES:
+
+1) Necesitamos una memoria para almacenar
+el valor de las variables. Las variables inicialmente
+tienen valor 0.
+
+2) A cada bloque del programa se le asocia un centinela
+para indicar si se interpreta o no.
+Al bloque mÃ¡s externo se la asocia un centinela
+con valor SÃ HAY QUE INTERPRETAR.
+
+Los centinelas de los bloques externos se propagan
+al bloque interno, pero no al revÃ©s.
+
+3) Nuestro intÃ©rprete procesa las instrucciones
+secuencialmente de la siguiente forma. Solo se procesan si el centinela
+que reciben es SI HAY QUE INTERPRETAR:
+
+3.1) asignacion : VAR ASIG expr PUNTOYCOMA;
+    Evaluar la expresiÃ³n (de forma recursiva)
+    y actualizar en la memoria el valor de VAR.
+
+3.2) ruptura : RUPTURA PUNTOYCOMA ;
+    detener la interpretaciÃ³n del bloque en el que estoy.
+    actualizando el valor del centinela a NO INTERPRETAR.
+
+3.3) impresion : MOSTRAR PARENTESISABIERTO vars PARENTESISCERRADO PUNTOYCOMA ;
+    consultar memoria para imprimir el valor de
+    cada variable en vars por orden secuencial
+
+3.4) condicional :  SI PARENTESISABIERTO condicion PARENTESISCERRADO ENTONCES
+                       lista_instrs (alternativa)?
+                    FINSI;
+
+     alternativa : SINO lista_instrs;
+
+     evaluar la condiciÃ³n (consultando en memoria el estado de las variables)
+     dependiendo del valor de la condiciÃ³n, hay que interpretar un
+     bloque u otro, por lo que tengo que crear un centinela
+     para cada bloque.
+
+
+// Iniciar memoria global vacÃ­a (Map<String,Integer>)
+
+
+programa : PROGRAMA variables instrucciones EOF ;
+
+variables : VARIABLES (lista_vars)? PUNTOYCOMA;
+
+lista_vars : VAR COMA lista_vars {almacenar VAR en memoria con valor 0}
+           | VAR {almacenar VAR en memoria con valor 0}
+           ;
+
+instrucciones : INSTRUCCIONES {cent=SI INTERPRETAR}(lista_instrs[cent])? ;
+
+lista_instrs[cent] : cent_nuevo=instruccion[cent]
+                        (lista_instrs[cent_nuevo])? ;
+
+instruccion[cent] dev cent_nuevo: cent_nuevo=asignacion[cent]
+            | cent_nuevo=condicional[cent]
+            | cent_nuevo=ruptura[cent]
+            | cent_nuevo=impresion[cent]
+            ;
+
+asignacion[cent] dev cent_nuevo : VAR ASIG v=expr PUNTOYCOMA;
+{
+    si cent igual a SI INTERPRETAR entonces
+        almacenar VAR en memoria con valor v
+    fsi
+    cent_nuevo=cent
+}
+
+ruptura[cent] dev cent_nuevo: RUPTURA PUNTOYCOMA
+    {cent_nuevo=NO INTERPRETAR};
+
+impresion[cent] dev cent_nuevo : MOSTRAR PARENTESISABIERTO vs=vars PARENTESISCERRADO PUNTOYCOMA ;
+    { si cent igual a SI INTERPRETAR
+        entonces imprimir valores de vars por pantalla
+      fsi
+      cent_nuevo=cent
+    }
+
+vars dev vs : VAR COMA vs2=vars {aÃ±adir VAR a vs y
+                                    todos los elementos de vs2}
+     | VAR  {aÃ±adir VAR a vs}
+     ;
+
+condicional[cent_ext] dev cent_nuevo:  SI PARENTESISABIERTO v=condicion PARENTESISCERRADO
+                ENTONCES
+                { si cent_ext es SI INTERPRETAR
+                          si v es true entonces
+                             centinela_si=SI INTERPRETRAR
+                             centinela_sino=NO INTERPRETAR
+                          sino
+                             centinela_si=NO INTERPRETRAR
+                             centinela_sino=SI INTERPRETAR
+                          fsi
+                   sino
+                        centinela_si= NO INTERPRETAR
+                        centinela_sino= NO INTEPRETAR
+                   fsi
+                }
+                  lista_instrs[centinela_si]
+                  (alternativa[centinela_sino])?
+                FINSI;
+                {cent_nuevo=cent_ext}
+
+alternativa[centinela] : SINO lista_instrs[centinela] ;
+
+
+condicion dev v: v1=expr MAYOR v2=expr {v es cierto si v1 es mayor que v2; sino v es falso}        #Mayor
+          | v1=expr MENOR v2=expr {v es cierto si v1 es menos que v2; sino v es falso}          #Menor
+          | v1=expr IGUAL v2=expr {v es cierto si v1 es igual que v2; sino v es falso}          #Igual
+          | v1=expr DISTINTO v2=expr {v es cierto si v1 es distinto que v2; sino v es falso}       #Distinto
+          | v1=expr MAYORIGUAL v2=expr {v es cierto si v1 es mayor o igual que v2; sino v es falso}     #MayorIgual
+          | v1=expr MENORIGUAL v2=expr  {v es cierto si v1 es menor o igual que v2; sino v es falso}    #MenorIgual
+          ;
+
+expr dev v: v1=expr MAS v2=expr {v=v1+v2}   #Mas
+     | v1=expr MENOS v2=expr {v=v1-v2} #Menos
+     | v1=expr POR v2=expr {v=v1*v2}    #Por
+     | VAR {v= consultar valor de VAR en memoria}             #Var
+     | NUM  {v= interpretar NUM}            #Num
+     | PARENTESISABIERTO v=expr PARENTESISCERRADO #ParExp
+     ;
+
+
