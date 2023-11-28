@@ -1,0 +1,17 @@
+## DECISIONES DEL LENGUAJE ##
+
+El concepto de estado está asociado al valor de las variables, las variables pueden ser numéricas o desconocido.
+Siendo desconocido el valor que se le da a una variable cuando se ejecuta la acción de leer
+
+1. Necesitaremos una memoria que almacene el valor de las variables, el cuál será un Map<String, Integer> llamado estado.
+La primera llamada a las variables se declararán con valor a 0
+y que podrá cambiar su valor en las instrucciones de lectura que cambien el valor de la variables y en las asignaciones
+
+2. Necesitaremos un centinela por cada opción que haya para las distintas selecciones del bloque condicional,
+el cuál indicará qué bloque de instrucciones vamos a generar en el código. Para ello:
+
+    - Necesitaremos poder calcular el valor aritmético y el valor booleano de las distintas expresiones que estén
+    en los condicionales y en las asignaciones
+    - Tendremos en cuenta el valor "desconocido" que se actualiza en la variable a la que se le está aplicando
+    la funcion leer y se mantendrá en "desconocido" a no ser que haya alguna asignación que actualice dicha variable
+    - Usaremos los centinelas para ver qué trozo de código nos llevamos, y evaluamos el valor de la condicion

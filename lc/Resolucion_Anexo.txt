@@ -1,0 +1,72 @@
+PROGRAMA
+VARIABLES
+ x,y,z;
+INSTRUCCIONES
+ leer(x);
+ x = 7;
+ si (x < 5) entonces
+ si (x < 7) entonces
+ y=z+1;
+ z = 2;
+ sino
+ z = 3;
+ fsi
+ z = 12;
+ sino
+ leer(x);
+ si (x < 10) entonces
+ z=y+1;
+ y = 2;
+ sino
+ y = z;
+ fsi
+ fsi
+
+
+
+PROGRAMA
+VARIABLES
+ x,y,z;
+INSTRUCCIONES
+ x = 7;
+ x = x + 1;
+ si (x > 5) entonces
+ y=1;
+ sino
+ z = 2;
+ fsi
+ z = 12;
+ si (x < 10) entonces
+ z=y+1;
+ y = 2;
+ fsi
+
+
+ ## OPTIMIZADO ##
+
+ PROGRAMA
+ VARIABLES
+    x,y,z;
+ INSTRUCCIONES
+    leer(x);
+    x = 7;
+    leer(x);
+    si (x < 10) entonces
+        z=y+1;
+        y = 2;
+    sino // No podemos borrar el sino ya que leer pide por pantalla un valor y no sabemos el valor del parámetro en este punto
+     y = z;
+    fsi
+
+
+
+PROGRAMA
+VARIABLES
+    x,y,z;
+INSTRUCCIONES
+ x = 7;
+ x = x + 1;
+ si (x > 5) entonces
+  y=1;
+ fsi
+ z = 12;
