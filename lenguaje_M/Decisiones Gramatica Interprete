@@ -1,0 +1,67 @@
+## DECISIONES INTERPRETE ##
+
+1. No tendremos una memoria para las variables ya que tendremos que
+mostrar por pantalla en instrucción el valor resultado de la operación
+2. Vamos interpretando las instrucciones secuencialmente
+3. Necesitaremos almacenar el tipo de cada línea y propagarlo para la expresión recursiva.
+El tipo se resolverá y devolverá en su llamada auxiliar
+4. Iremos resolviendo recursivamente la operación para devolver el resultado por pantalla.
+Teniendo el cuenta el tipo:
+
+    - Si estamos en un tipo de booleano y nos encontramos un NUMERO resolveremos dicho valor sabiendo que:
+        Si NUMERO > 0 entonces dicho valor es true sino es false. Tambien si un la operacion es de caracter
+        aritmética el resultado devolverá indefinido
+
+    - Igual que la anterior teniendo en cuenta que si tenemos un tipo nat cierto devolverá 1 y falso
+    devolverá 0.También que si nos encontramos una operación de carácter booleano teniendo tipo nat
+    entonces devolveremos indefinido
+
+5. Si estamos trabajando con una expresion que tiene un valor indefinido el resultado será indefinido
+
+
+## GRAMATICA ATRIBUIDA ##
+
+programa: PROGRAMA (instruccion)*
+
+// DECISION 2 y DECISION 3
+instruccion: PARENTESISABIERTO t=tipo PARENTESISCERRADO e=expresion[t] PUNTOYCOMA
+// DECISION 3
+tipo dev t: NAT | BOOL ;
+// DECISION 4
+expresion[t] dev e: e1=expresion1[t] MAS e2=expresion[t]
+{si t = nat entonces e = e1+e2 sino e=indefinido}
+| e1=expresion1[t] MENOS e2=expresion[t]
+{si t = nat entonces e = e1-e2 sino e=indefinido}
+| e1=expresion1[t] O e2=expresion[t]
+{si t = bool entonces e = e1||e2 sino e=indefinido}
+| e1=expresion1[t]
+{e = e1}
+// DECISION 5
+{ Si estamos operando con algún valor indefinido el resultado que devuelve es indefinido}
+
+// DECISION 4 Y DECISION 5
+expresion1[t] dev e: e1=expresion2[t] POR expresion1[t]
+{Si t = nat
+    Si e1 y e2 no son indefinido entonces e = e1*e2
+    sino e = indefinido}
+| e1=expresion2[t] Y e2=expresion1[t]
+{Si t = bool
+    Si e1 y e2 tienen valor booleano entonces e = e1 && e2
+    sino alguno tiene valor indefinido entonces e = indefinido
+ sino e = indefinido
+ }
+| e = expresion2[t]
+
+// DECISION 4 Y DECISION 5
+expresion2[t] dev e: PARENTESISABIERTO e=expresion[t] PARENTESISCERRADO
+| NO e1=expresion[t]
+{ si t = bool entonces e = !e1 sino entonces e = indefinido}
+| NUMERO
+{si t = nat entonces e = NUMERO
+    sino
+        si NUMERO > 0 entonces e = cierto
+         sino e = falso}
+| CIERTO
+{si t = bool entonce e = cierto sino t = 1}
+| FALSO
+{si t = bool entonces e = false sino t = 0}
